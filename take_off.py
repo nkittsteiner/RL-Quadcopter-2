@@ -24,12 +24,28 @@ class TakeOffTask():
         self.action_size = 4
 
         # Goal
-        self.target_pos = target_pos if target_pos is not None else np.array([0., 100., 10.]) 
+        self.target_pos = target_pos if target_pos is not None else np.array([0., 10., 100.]) 
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
         #reward = 1.-.1*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        reward = self.sim.pose[1] if self.sim.pose[1] >= self.target_pos[1] else self.sim.pose[1] * -1.0
+        reward = - np.inf
+        if self.sim.pose[2] > self.target_pos[2] - 30.:
+            reward = self.sim.pose[2] * 10.
+        elif self.sim.pose[2] < self.target_pos[2] and self.sim.pose[2] > 0:
+            reward = self.sim.pose[2] * 0.1
+        else: 
+            reward = self.sim.pose[2] * -1.0
+
+        # Penalize out of offsets from X and Y axis
+        offset = 20
+        x_offset = self.sim.pose[0] < self.target_pos[0] - offset or self.sim.pose[0] > self.target_pos[0] + offset
+        y_offset = x_offset = self.sim.pose[1] < self.target_pos[1] - offset or self.sim.pose[1] > self.target_pos[1] + offset
+
+        if x_offset or y_offset:
+            reward = 0
+
+
         return reward
 
     def step(self, rotor_speeds):
