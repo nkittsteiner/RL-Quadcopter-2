@@ -37,15 +37,6 @@ class TakeOffTask():
         else: 
             reward = self.sim.pose[2] * -1.0
 
-        # Penalize out of offsets from X and Y axis
-        offset = 20
-        x_offset = self.sim.pose[0] < self.target_pos[0] - offset or self.sim.pose[0] > self.target_pos[0] + offset
-        y_offset = x_offset = self.sim.pose[1] < self.target_pos[1] - offset or self.sim.pose[1] > self.target_pos[1] + offset
-
-        if x_offset or y_offset:
-            reward = 0
-
-
         return reward
 
     def step(self, rotor_speeds):
